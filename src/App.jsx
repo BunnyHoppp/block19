@@ -6,10 +6,7 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    // You can fetch the local JSON file during initial render if needed
-    // fetch('/data.json')
-    //   .then(response => response.json())
-    //   .then(data => console.log(data));
+    // You can fetch the local JSON file during the initial render if needed
   }, []);
 
   const handleSubmit = async () => {
@@ -19,7 +16,10 @@ function App() {
     }
 
     try {
-      const response = await fetch('/data.json'); // Query the JSON file from public
+      const response = await fetch('/data.json'); // Assuming your file is in the public folder
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
       const data = await response.json();
 
       const room = data.find(item => item.Room === roomInput);
