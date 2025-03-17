@@ -1,31 +1,63 @@
-import React, { useState } from 'react';
-import './App.css';  // Import the CSS file if you want to style separately
+import React, { useState, useEffect } from 'react';
 
 function App() {
-  // State to store the input value
-  const [inputValue, setInputValue] = useState('');
+  const [roomInput, setRoomInput] = useState('');
+  const [roomData, setRoomData] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // Handler for input change
-  const handleInputChange = (event) => {
-    setInputValue(event.target.value);
+  useEffect(() => {
+    // You can fetch the local JSON file during initial render if needed
+    // fetch('/data.json')
+    //   .then(response => response.json())
+    //   .then(data => console.log(data));
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!roomInput) {
+      setErrorMessage('Please enter a room number.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/data.json'); // Query the JSON file from public
+      const data = await response.json();
+
+      const room = data.find(item => item.Room === roomInput);
+      if (room) {
+        setRoomData(room);
+        setErrorMessage('');
+      } else {
+        setErrorMessage('Room not found.');
+        setRoomData(null);
+      }
+    } catch (error) {
+      console.error('Error fetching JSON data:', error);
+      setErrorMessage('Error fetching room data. Please try again.');
+    }
   };
 
   return (
     <div className="App">
-      {/* Header */}
-      <h1>Input your room number here</h1>
-
-      {/* Input field */}
+      <h1>Enter Room Number</h1>
       <input
         type="text"
-        value={inputValue}
-        onChange={handleInputChange}
-        placeholder="Room number"
-        className="input-field"
+        value={roomInput}
+        onChange={(e) => setRoomInput(e.target.value)}
+        placeholder="Enter Room Number (e.g., 19/1/A)"
       />
+      <button onClick={handleSubmit}>Submit</button>
 
-      {/* Display entered value */}
-      <p>You entered: {inputValue}</p>
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+
+      {roomData && (
+        <div>
+          <h2>Room Data</h2>
+          <p><strong>Room:</strong> {roomData.Room}</p>
+          <p><strong>Beach:</strong> {roomData.Beach ? 'Yes' : 'No'}</p>
+          <p><strong>CNY:</strong> {roomData.CNY ? 'Yes' : 'No'}</p>
+          <p><strong>Doorcard:</strong> {roomData.Doorcard ? 'Yes' : 'No'}</p>
+        </div>
+      )}
     </div>
   );
 }
